@@ -16,6 +16,7 @@
       align-items: center;
       flex-direction: column;
       height: 100vh;
+      box-sizing: border-box;
     }
     .container {
       width: 100%;
@@ -26,7 +27,7 @@
       box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
       overflow-y: auto;
     }
-    h1 {
+    h1, h2 {
       text-align: center;
       color: #4CAF50;
     }
@@ -35,7 +36,7 @@
     }
     input, select, button {
       width: 100%;
-      padding: 10px;
+      padding: 12px;
       margin: 10px 0;
       border-radius: 5px;
       border: 1px solid #ddd;
@@ -99,6 +100,14 @@
       width: 100%;
       max-width: 500px;
     }
+    .nav-buttons {
+      display: flex;
+      justify-content: space-around;
+      margin-top: 20px;
+    }
+    .nav-buttons button {
+      width: 48%;
+    }
   </style>
 </head>
 <body>
@@ -123,17 +132,31 @@
       <div id="register-error-message" class="error"></div>
     </div>
 
+    <!-- Pantalla de inicio -->
+    <div id="home-section" style="display:none;">
+      <h2>Bienvenido, <span id="welcome-name"></span></h2>
+      <div class="nav-buttons">
+        <button onclick="showNotesForm()">Agregar Notas</button>
+        <button onclick="showUserNotes()">Mis Notas</button>
+        <button onclick="showUsersList()">Usuarios Registrados</button>
+        <button onclick="logout()">Cerrar sesión</button>
+      </div>
+    </div>
+
     <!-- Pantalla de notas -->
     <div id="notes-section" style="display:none;">
-      <h2>Bienvenido, <span id="welcome-name"></span></h2>
       <label for="materia">Materia:</label>
       <input type="text" id="materia" placeholder="Ejemplo: Matemáticas">
       <label for="trimestre">Trimestre:</label>
-      <input type="text" id="trimestre" placeholder="Ejemplo: 1er Trimestre">
+      <select id="trimestre">
+        <option value="1">1er Trimestre</option>
+        <option value="2">2do Trimestre</option>
+        <option value="3">3er Trimestre</option>
+      </select>
       <label for="nota">Nota:</label>
       <input type="number" id="nota" placeholder="Nota (0-10)" min="0" max="10">
       <button onclick="addNote()">Agregar Nota</button>
-      <button onclick="logout()">Cerrar sesión</button>
+      <button onclick="showHome()">Volver al Inicio</button>
 
       <!-- Lista de notas -->
       <div class="note-list" id="note-list"></div>
@@ -146,6 +169,7 @@
     <div id="users-list-section" style="display:none;">
       <h2>Usuarios Registrados</h2>
       <ul id="users-list" class="users-list"></ul>
+      <button onclick="deleteUser()">Eliminar Usuario</button>
     </div>
   </div>
 
@@ -177,7 +201,6 @@
         document.getElementById('register-error-message').textContent = "Este usuario ya existe.";
         return;
       }
-
       usersList.push(newUsername);
       localStorage.setItem('users', JSON.stringify(usersList));
       showLoginForm();
@@ -190,21 +213,17 @@
         document.getElementById('error-message').textContent = "Este usuario no existe.";
         return;
       }
-
       currentUser = username;
       document.getElementById('username').value = '';
       document.getElementById('login-section').style.display = 'none';
-      document.getElementById('notes-section').style.display = 'block';
-      document.getElementById('welcome-name').textContent = username;
-      loadNotes();
-      showUsersList();
+      showHome();
     }
 
     // Cerrar sesión
     function logout() {
       currentUser = null;
       document.getElementById('login-section').style.display = 'block';
-      document.getElementById('notes-section').style.display = 'none';
+      document.getElementById('home-section').style.display = 'none';
       document.getElementById('note-list').innerHTML = '';
       document.getElementById('materia').value = '';
       document.getElementById('trimestre').value = '';
@@ -212,59 +231,21 @@
       showUsersList();
     }
 
-    // Mostrar la lista de usuarios
-    function showUsersList() {
-      const usersListSection = document.getElementById('users-list-section');
-      const usersListElement = document.getElementById('users-list');
-      usersListElement.innerHTML = '';
-      usersList.forEach(user => {
-        const li = document.createElement('li');
-        li.textContent = user;
-        usersListElement.appendChild(li);
-      });
-      usersListSection.style.display = 'block';
+    // Mostrar la pantalla de inicio
+    function showHome() {
+      document.getElementById('home-section').style.display = 'block';
+      document.getElementById('notes-section').style.display = 'none';
+      document.getElementById('welcome-name').textContent = currentUser;
     }
 
-    // Agregar nota
-    function addNote() {
-      const materia = document.getElementById('materia').value;
-      const trimestre = document.getElementById('trimestre').value;
-      const nota = document.getElementById('nota').value;
-      
-      if (!materia || !trimestre || !nota) {
-        alert("Por favor, completa todos los campos.");
-        return;
-      }
-
-      const userNotes = getUserNotes();
-      userNotes.push({ materia, trimestre, nota: parseFloat(nota) });
-      saveUserNotes(userNotes);
-      loadNotes();
-      document.getElementById('materia').value = '';
-      document.getElementById('trimestre').value = '';
-      document.getElementById('nota').value = '';
+    // Mostrar el formulario de notas
+    function showNotesForm() {
+      document.getElementById('home-section').style.display = 'none';
+      document.getElementById('notes-section').style.display = 'block';
     }
 
-    // Eliminar nota
-    function deleteNote(index) {
-      const userNotes = getUserNotes();
-      userNotes.splice(index, 1);
-      saveUserNotes(userNotes);
-      loadNotes();
-    }
-
-    // Editar nota
-    function editNote(index) {
-      const userNotes = getUserNotes();
-      const note = userNotes[index];
-      document.getElementById('materia').value = note.materia;
-      document.getElementById('trimestre').value = note.trimestre;
-      document.getElementById('nota').value = note.nota;
-      deleteNote(index);
-    }
-
-    // Cargar notas del usuario
-    function loadNotes() {
+    // Mostrar las notas del usuario
+    function showUserNotes() {
       const userNotes = getUserNotes();
       const noteList = document.getElementById('note-list');
       noteList.innerHTML = '';
@@ -285,13 +266,53 @@
       renderChart(userNotes);
     }
 
-    // Obtener notas del usuario desde localStorage
+    // Agregar nota
+    function addNote() {
+      const materia = document.getElementById('materia').value;
+      const trimestre = document.getElementById('trimestre').value;
+      const nota = document.getElementById('nota').value;
+      if (!materia || !trimestre || !nota) {
+        alert("Por favor, completa todos los campos.");
+        return;
+      }
+      const userNotes = getUserNotes();
+      userNotes.push({ materia, trimestre, nota: parseFloat(nota) });
+      saveUserNotes(userNotes);
+      showUserNotes();
+      document.getElementById('materia').value = '';
+      document.getElementById('trimestre').value = '';
+      document.getElementById('nota').value = '';
+    }
+
+    // Eliminar nota
+    function deleteNote(index) {
+      const userNotes = getUserNotes();
+      userNotes.splice(index, 1);
+      saveUserNotes(userNotes);
+      showUserNotes();
+    }
+
+    // Eliminar usuario
+    function deleteUser() {
+      const username = prompt("Introduce el nombre del usuario que deseas eliminar:");
+      const index = usersList.indexOf(username);
+      if (index !== -1) {
+        usersList.splice(index, 1);
+        localStorage.setItem('users', JSON.stringify(usersList));
+        alert("Usuario eliminado correctamente.");
+        showLoginForm();
+      } else {
+        alert("Este usuario no existe.");
+      }
+    }
+
+    // Obtener notas del usuario
     function getUserNotes() {
       const notes = localStorage.getItem(currentUser);
       return notes ? JSON.parse(notes) : [];
     }
 
-    // Guardar notas del usuario en localStorage
+    // Guardar notas del usuario
     function saveUserNotes(notes) {
       localStorage.setItem(currentUser, JSON.stringify(notes));
     }
@@ -301,6 +322,9 @@
       const labels = userNotes.map(note => `${note.materia} (${note.trimestre})`);
       const data = userNotes.map(note => note.nota);
 
+      const average = data.reduce((a, b) => a + b, 0) / data.length;
+      const color = average < 70 ? 'red' : 'green'; 
+
       const ctx = document.getElementById('chart').getContext('2d');
       new Chart(ctx, {
         type: 'bar',
@@ -309,8 +333,8 @@
           datasets: [{
             label: 'Notas por materia',
             data: data,
-            backgroundColor: 'rgba(76, 175, 80, 0.5)',
-            borderColor: 'rgba(76, 175, 80, 1)',
+            backgroundColor: color,
+            borderColor: color,
             borderWidth: 1
           }]
         },
@@ -328,5 +352,6 @@
   </script>
 </body>
 </html>
+
 
 
