@@ -1,249 +1,189 @@
-<!DOCTYPE html>
+
+
+  <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
   <title>Notas de Exámenes</title>
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      margin: 0;
-      background: #f4f4f4;
-      color: #333;
-      max-width: 480px;
-      margin: auto;
-    }
-
-    header {
-      background-color: #007bff;
-      color: white;
-      padding: 1rem;
-      text-align: center;
-    }
-
-    section {
-      display: none;
-      padding: 1rem;
-    }
-
-    .active {
-      display: block;
-    }
-
-    input, select, button {
-      width: 100%;
-      padding: 10px;
-      margin: 10px 0;
-      font-size: 1rem;
-    }
-
-    .menu button {
-      margin: 5px 0;
-    }
-
-    .note-item {
-      background: white;
-      padding: 10px;
-      margin: 5px 0;
-      border-radius: 8px;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-    }
-
-    .note-item.red {
-      border-left: 5px solid red;
-    }
-
-    .note-item.green {
-      border-left: 5px solid green;
-    }
-
-    ul {
-      list-style: none;
-      padding: 0;
-    }
-
-    ul li {
-      background: white;
-      margin: 5px 0;
-      padding: 10px;
-      border-radius: 5px;
-    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: Arial, sans-serif; background: #f0f2f5; padding: 10px; }
+    h2 { margin: 10px 0; text-align: center; }
+    .container { max-width: 380px; margin: auto; padding: 20px; background: white; border-radius: 15px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+    input, select, button { width: 100%; margin: 10px 0; padding: 10px; font-size: 16px; border-radius: 8px; border: 1px solid #ccc; }
+    button { background-color: #007bff; color: white; border: none; cursor: pointer; }
+    button:hover { background-color: #0056b3; }
+    .hidden { display: none; }
+    .note { margin: 5px 0; padding: 8px; background: #e0e0e0; border-radius: 5px; }
+    .note.red { background: #f8d7da; }
+    .note.green { background: #d4edda; }
+    .btn-small { padding: 5px 10px; font-size: 12px; margin-left: 5px; }
   </style>
 </head>
 <body>
-  <header>
-    <h1>Notas de Exámenes</h1>
-  </header>
+  <div class="container">
+    <div id="auth-section">
+      <h2>Registro</h2>
+      <input id="reg-username" placeholder="Nombre de usuario">
+      <input id="reg-password" placeholder="Contraseña" type="password">
+      <button onclick="register()">Registrarse</button>
 
-  <section id="login-section" class="active">
-    <h2>Iniciar sesión</h2>
-    <input type="text" id="username" placeholder="Nombre de usuario" />
-    <button onclick="login()">Iniciar sesión</button>
-    <p id="login-error" style="color:red;"></p>
-    <p>¿No tienes cuenta? <button onclick="showSection('register-section')">Registrarse</button></p>
-  </section>
-
-  <section id="register-section">
-    <h2>Registrarse</h2>
-    <input type="text" id="new-username" placeholder="Nombre de usuario" />
-    <button onclick="register()">Crear cuenta</button>
-    <p id="register-error" style="color:red;"></p>
-    <p>¿Ya tienes cuenta? <button onclick="showSection('login-section')">Iniciar sesión</button></p>
-  </section>
-
-  <section id="home-section">
-    <h2>Bienvenido <span id="current-user"></span></h2>
-    <div class="menu">
-      <button onclick="showSection('add-note-section')">Agregar Nota</button>
-      <button onclick="showUsers()">Ver Usuarios Registrados</button>
-      <button onclick="showSection('delete-user-section')">Eliminar Usuario</button>
-      <button onclick="logout()">Cerrar sesión</button>
+      <h2>Login</h2>
+      <input id="login-username" placeholder="Nombre de usuario">
+      <input id="login-password" placeholder="Contraseña" type="password">
+      <button onclick="login()">Iniciar Sesión</button>
     </div>
-  </section>
 
-  <section id="add-note-section">
-    <h3>Agregar Nota</h3>
-    <select id="materia">
-      <option>Matemática</option>
-      <option>Física</option>
-      <option>Español</option>
-      <option>Inglés</option>
-      <option>Sociales</option>
-    </select>
-    <select id="trimestre">
-      <option>1er Trimestre</option>
-      <option>2do Trimestre</option>
-      <option>3er Trimestre</option>
-    </select>
-    <input type="number" id="nota" placeholder="Nota (0 a 100)" />
-    <button onclick="addNote()">Guardar Nota</button>
-    <button onclick="showSection('home-section')">Volver</button>
-    <div id="note-list"></div>
-  </section>
+    <div id="main-section" class="hidden">
+      <h2 id="welcome"></h2>
+      <button onclick="showAddNote()">Agregar Nota</button>
+      <button onclick="showAllUsers()">Ver Usuarios Registrados</button>
+      <button onclick="showChangePassword()">Cambiar Contraseña</button>
+      <button onclick="showDeleteUser()">Eliminar Usuario</button>
+      <button onclick="logout()">Cerrar Sesión</button>
+    </div>
 
-  <section id="users-section">
-    <h3>Usuarios Registrados</h3>
-    <ul id="users-list"></ul>
-    <button onclick="showSection('home-section')">Volver</button>
-  </section>
+    <div id="note-section" class="hidden">
+      <h2>Agregar Nota</h2>
+      <select id="subject">
+        <option>Matematica</option>
+        <option>Fisica</option>
+        <option>Espanol</option>
+        <option>Ingles</option>
+        <option>Sociales</option>
+      </select>
+      <select id="term">
+        <option>1er Trimestre</option>
+        <option>2do Trimestre</option>
+        <option>3er Trimestre</option>
+      </select>
+      <input id="grade" type="number" min="0" max="100" placeholder="Nota (0 - 100)">
+      <button onclick="addNote()">Guardar Nota</button>
+      <button onclick="backToMain()">Volver</button>
+    </div>
 
-  <section id="delete-user-section">
-    <h3>Eliminar Usuario</h3>
-    <input type="password" id="delete-password" placeholder="Contraseña" />
-    <button onclick="deleteUser()">Eliminar</button>
-    <p id="delete-error" style="color:red;"></p>
-    <button onclick="showSection('home-section')">Volver</button>
-  </section>
+    <div id="users-section" class="hidden">
+      <h2>Usuarios Registrados</h2>
+      <div id="user-list"></div>
+      <button onclick="backToMain()">Volver</button>
+    </div>
+
+    <div id="change-pass-section" class="hidden">
+      <h2>Cambiar Contraseña</h2>
+      <input id="old-pass" placeholder="Contraseña actual" type="password">
+      <input id="new-pass" placeholder="Nueva contraseña" type="password">
+      <button onclick="changePassword()">Cambiar</button>
+      <button onclick="backToMain()">Volver</button>
+    </div>
+
+    <div id="delete-section" class="hidden">
+      <h2>Eliminar Usuario</h2>
+      <input id="del-username" placeholder="Usuario a eliminar">
+      <input id="admin-pass" placeholder="Contraseña Admin" type="password">
+      <button onclick="deleteUser()">Eliminar</button>
+      <button onclick="backToMain()">Volver</button>
+    </div>
+  </div>
 
   <script>
-    let users = JSON.parse(localStorage.getItem("users") || "[]");
-    let notes = JSON.parse(localStorage.getItem("notes") || "{}");
     let currentUser = null;
+    const ADMIN_PASSWORD = '04190909';
 
-    function showSection(id) {
-      document.querySelectorAll('section').forEach(sec => sec.classList.remove('active'));
-      document.getElementById(id).classList.add('active');
+    function saveUsers(users) {
+      localStorage.setItem('users', JSON.stringify(users));
+    }
+
+    function getUsers() {
+      return JSON.parse(localStorage.getItem('users') || '{}');
     }
 
     function register() {
-      const user = document.getElementById("new-username").value.trim();
-      const error = document.getElementById("register-error");
-      if (!user) {
-        error.textContent = "El nombre no puede estar vacío.";
-        return;
-      }
-      if (users.includes(user)) {
-        error.textContent = "El usuario ya existe.";
-        return;
-      }
-      users.push(user);
-      localStorage.setItem("users", JSON.stringify(users));
-      currentUser = user;
-      document.getElementById("current-user").textContent = user;
-      showSection("home-section");
+      const user = document.getElementById('reg-username').value.trim();
+      const pass = document.getElementById('reg-password').value;
+      const users = getUsers();
+      if (users[user]) return alert('El usuario ya existe');
+      users[user] = { password: pass, notes: [] };
+      saveUsers(users);
+      alert('Usuario registrado');
     }
 
     function login() {
-      const user = document.getElementById("username").value.trim();
-      const error = document.getElementById("login-error");
-      if (!users.includes(user)) {
-        error.textContent = "Este usuario no existe.";
-        return;
-      }
+      const user = document.getElementById('login-username').value.trim();
+      const pass = document.getElementById('login-password').value;
+      const users = getUsers();
+      if (!users[user]) return alert('Este usuario no existe');
+      if (users[user].password !== pass) return alert('Contraseña incorrecta');
       currentUser = user;
-      document.getElementById("current-user").textContent = user;
-      showSection("home-section");
+      document.getElementById('welcome').textContent = 'Bienvenido, ' + user;
+      toggleSections('main-section');
     }
 
     function logout() {
       currentUser = null;
-      showSection("login-section");
+      toggleSections('auth-section');
     }
+
+    function showAddNote() { toggleSections('note-section'); }
+    function showAllUsers() {
+      toggleSections('users-section');
+      const users = getUsers();
+      const list = document.getElementById('user-list');
+      list.innerHTML = '';
+      for (const [name, data] of Object.entries(users)) {
+        const box = document.createElement('div');
+        box.innerHTML = `<strong>${name}</strong><br>` +
+          data.notes.map((n, i) => `<div class="note ${n.grade<70?'red':'green'}">${n.subject} - ${n.term}: ${n.grade}</div>`).join('');
+        list.appendChild(box);
+      }
+    }
+    function showChangePassword() { toggleSections('change-pass-section'); }
+    function showDeleteUser() { toggleSections('delete-section'); }
 
     function addNote() {
-      const materia = document.getElementById("materia").value;
-      const trimestre = document.getElementById("trimestre").value;
-      const nota = parseInt(document.getElementById("nota").value);
-      if (isNaN(nota) || nota < 0 || nota > 100) {
-        alert("Ingresa una nota válida entre 0 y 100.");
-        return;
-      }
-      if (!notes[currentUser]) notes[currentUser] = [];
-      notes[currentUser].push({ materia, trimestre, nota });
-      localStorage.setItem("notes", JSON.stringify(notes));
-      document.getElementById("nota").value = '';
-      renderNotes();
+      const subject = document.getElementById('subject').value;
+      const term = document.getElementById('term').value;
+      const grade = parseInt(document.getElementById('grade').value);
+      if (isNaN(grade) || grade < 0 || grade > 100) return alert('Nota inválida');
+      const users = getUsers();
+      users[currentUser].notes.push({ subject, term, grade });
+      saveUsers(users);
+      alert('Nota agregada');
+      backToMain();
     }
 
-    function renderNotes() {
-      const noteList = document.getElementById("note-list");
-      noteList.innerHTML = "";
-      const myNotes = notes[currentUser] || [];
-      myNotes.forEach(n => {
-        const div = document.createElement("div");
-        div.className = "note-item " + (n.nota >= 70 ? "green" : "red");
-        div.innerHTML = `
-          <strong>Materia:</strong> ${n.materia}<br>
-          <strong>Trimestre:</strong> ${n.trimestre}<br>
-          <strong>Nota:</strong> ${n.nota}
-        `;
-        noteList.appendChild(div);
-      });
-    }
-
-    function showUsers() {
-      const ul = document.getElementById("users-list");
-      ul.innerHTML = "";
-      users.forEach(u => {
-        const li = document.createElement("li");
-        li.innerHTML = `<strong>${u}</strong><br>`;
-        const uNotes = notes[u] || [];
-        uNotes.forEach(n => {
-          li.innerHTML += `${n.materia} (${n.trimestre}): ${n.nota}<br>`;
-        });
-        ul.appendChild(li);
-      });
-      showSection("users-section");
+    function changePassword() {
+      const oldPass = document.getElementById('old-pass').value;
+      const newPass = document.getElementById('new-pass').value;
+      const users = getUsers();
+      if (users[currentUser].password !== oldPass) return alert('Contraseña actual incorrecta');
+      users[currentUser].password = newPass;
+      saveUsers(users);
+      alert('Contraseña actualizada con éxito');
+      backToMain();
     }
 
     function deleteUser() {
-      const password = document.getElementById("delete-password").value;
-      const error = document.getElementById("delete-error");
-      if (password !== "04190909") {
-        error.textContent = "La contraseña es incorrecta.";
-        return;
-      }
-      const confirmDelete = confirm("¿Seguro que deseas eliminar tu usuario?");
-      if (confirmDelete && currentUser) {
-        users = users.filter(u => u !== currentUser);
-        delete notes[currentUser];
-        localStorage.setItem("users", JSON.stringify(users));
-        localStorage.setItem("notes", JSON.stringify(notes));
-        currentUser = null;
-        showSection("login-section");
-      }
+      const userToDelete = document.getElementById('del-username').value.trim();
+      const adminPass = document.getElementById('admin-pass').value;
+      const users = getUsers();
+      if (adminPass !== ADMIN_PASSWORD) return alert('La contraseña es incorrecta');
+      if (!users[userToDelete]) return alert('Usuario no encontrado');
+      delete users[userToDelete];
+      saveUsers(users);
+      alert('Usuario eliminado');
+      if (userToDelete === currentUser) logout();
+    }
+
+    function toggleSections(showId) {
+      ['auth-section', 'main-section', 'note-section', 'users-section', 'change-pass-section', 'delete-section']
+        .forEach(id => document.getElementById(id).classList.add('hidden'));
+      document.getElementById(showId).classList.remove('hidden');
+    }
+
+    function backToMain() {
+      toggleSections('main-section');
     }
   </script>
 </body>
 </html>
-
