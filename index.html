@@ -1,377 +1,249 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Registro de Notas</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+  <title>Notas de Exámenes</title>
   <style>
     body {
       font-family: Arial, sans-serif;
-      background-color: #f1f1f1;
-      color: #333;
       margin: 0;
-      padding: 0;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      flex-direction: column;
-      height: 100vh;
-      box-sizing: border-box;
+      background: #f4f4f4;
+      color: #333;
+      max-width: 480px;
+      margin: auto;
     }
-    .container {
-      width: 100%;
-      max-width: 400px; /* Hacer la página más estrecha para pantallas de iPhone */
-      padding: 20px;
-      background-color: #fff;
-      border-radius: 10px;
-      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-      overflow-y: auto;
-    }
-    h1, h2 {
+
+    header {
+      background-color: #007bff;
+      color: white;
+      padding: 1rem;
       text-align: center;
-      color: #4CAF50;
     }
-    label {
-      font-size: 18px;
+
+    section {
+      display: none;
+      padding: 1rem;
     }
+
+    .active {
+      display: block;
+    }
+
     input, select, button {
       width: 100%;
-      padding: 12px;
-      margin: 10px 0;
-      border-radius: 5px;
-      border: 1px solid #ddd;
-      font-size: 16px;
-    }
-    button {
-      background-color: #4CAF50;
-      color: white;
-      border: none;
-    }
-    button:hover {
-      background-color: #45a049;
-    }
-    .note-list {
-      margin-top: 20px;
-    }
-    .note-item {
-      background-color: #fafafa;
       padding: 10px;
       margin: 10px 0;
-      border-radius: 5px;
-      box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+      font-size: 1rem;
     }
-    .note-item span {
-      display: inline-block;
-      margin-right: 10px;
+
+    .menu button {
+      margin: 5px 0;
     }
-    .edit-btn, .delete-btn {
-      background-color: #f0ad4e;
-      border: none;
-      color: white;
-      padding: 5px;
-      border-radius: 5px;
-      cursor: pointer;
+
+    .note-item {
+      background: white;
+      padding: 10px;
+      margin: 5px 0;
+      border-radius: 8px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
     }
-    .delete-btn {
-      background-color: #d9534f;
+
+    .note-item.red {
+      border-left: 5px solid red;
     }
-    .edit-btn:hover, .delete-btn:hover {
-      opacity: 0.8;
+
+    .note-item.green {
+      border-left: 5px solid green;
     }
-    .error {
-      color: red;
-      font-size: 14px;
-      text-align: center;
-    }
-    .users-list {
-      margin-top: 20px;
-      font-size: 16px;
-      list-style-type: none;
+
+    ul {
+      list-style: none;
       padding: 0;
     }
-    .users-list li {
-      padding: 5px;
+
+    ul li {
+      background: white;
       margin: 5px 0;
-      background-color: #f9f9f9;
+      padding: 10px;
       border-radius: 5px;
-    }
-    canvas {
-      margin-top: 30px;
-      width: 100%;
-      max-width: 500px;
-    }
-    .nav-buttons {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 10px;
-      margin-top: 20px;
-    }
-    .nav-buttons button {
-      width: 100%;
-      padding: 15px;
-      font-size: 16px;
-      background-color: #4CAF50;
-      color: white;
-      border: none;
-      border-radius: 10px;
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-      cursor: pointer;
-      text-align: center;
-    }
-    .nav-buttons button:hover {
-      background-color: #45a049;
-    }
-    .nav-buttons button:active {
-      transform: scale(0.98);
-    }
-    .back-btn {
-      background-color: #f0ad4e;
-    }
-    .back-btn:hover {
-      background-color: #ec971f;
-    }
-    .delete-btn {
-      background-color: #d9534f;
-    }
-    .delete-btn:hover {
-      background-color: #c9302c;
     }
   </style>
 </head>
 <body>
-  <div class="container">
+  <header>
     <h1>Notas de Exámenes</h1>
+  </header>
 
-    <!-- Login / Registro -->
-    <div id="login-section">
-      <label for="username">Nombre de usuario:</label>
-      <input type="text" id="username" placeholder="Ejemplo: Andre">
-      <button onclick="login()">Iniciar sesión</button>
-      <button onclick="showRegisterForm()">Crear cuenta</button>
-      <div id="error-message" class="error"></div>
+  <section id="login-section" class="active">
+    <h2>Iniciar sesión</h2>
+    <input type="text" id="username" placeholder="Nombre de usuario" />
+    <button onclick="login()">Iniciar sesión</button>
+    <p id="login-error" style="color:red;"></p>
+    <p>¿No tienes cuenta? <button onclick="showSection('register-section')">Registrarse</button></p>
+  </section>
+
+  <section id="register-section">
+    <h2>Registrarse</h2>
+    <input type="text" id="new-username" placeholder="Nombre de usuario" />
+    <button onclick="register()">Crear cuenta</button>
+    <p id="register-error" style="color:red;"></p>
+    <p>¿Ya tienes cuenta? <button onclick="showSection('login-section')">Iniciar sesión</button></p>
+  </section>
+
+  <section id="home-section">
+    <h2>Bienvenido <span id="current-user"></span></h2>
+    <div class="menu">
+      <button onclick="showSection('add-note-section')">Agregar Nota</button>
+      <button onclick="showUsers()">Ver Usuarios Registrados</button>
+      <button onclick="showSection('delete-user-section')">Eliminar Usuario</button>
+      <button onclick="logout()">Cerrar sesión</button>
     </div>
+  </section>
 
-    <!-- Formulario de registro -->
-    <div id="register-section" style="display: none;">
-      <label for="new-username">Nuevo nombre de usuario:</label>
-      <input type="text" id="new-username" placeholder="Ejemplo: Andre">
-      <button onclick="register()">Registrar cuenta</button>
-      <button onclick="showLoginForm()">Volver a Login</button>
-      <div id="register-error-message" class="error"></div>
-    </div>
+  <section id="add-note-section">
+    <h3>Agregar Nota</h3>
+    <select id="materia">
+      <option>Matemática</option>
+      <option>Física</option>
+      <option>Español</option>
+      <option>Inglés</option>
+      <option>Sociales</option>
+    </select>
+    <select id="trimestre">
+      <option>1er Trimestre</option>
+      <option>2do Trimestre</option>
+      <option>3er Trimestre</option>
+    </select>
+    <input type="number" id="nota" placeholder="Nota (0 a 100)" />
+    <button onclick="addNote()">Guardar Nota</button>
+    <button onclick="showSection('home-section')">Volver</button>
+    <div id="note-list"></div>
+  </section>
 
-    <!-- Pantalla de inicio -->
-    <div id="home-section" style="display:none;">
-      <h2>Bienvenido, <span id="welcome-name"></span></h2>
-      <div class="nav-buttons">
-        <button onclick="showNotesForm()">Agregar Notas</button>
-        <button onclick="showUserNotes()">Ver Notas</button>
-        <button onclick="showUsersList()">Ver Usuarios</button>
-        <button onclick="logout()">Cerrar sesión</button>
-      </div>
-    </div>
+  <section id="users-section">
+    <h3>Usuarios Registrados</h3>
+    <ul id="users-list"></ul>
+    <button onclick="showSection('home-section')">Volver</button>
+  </section>
 
-    <!-- Pantalla de notas -->
-    <div id="notes-section" style="display:none;">
-      <label for="materia">Materia:</label>
-      <select id="materia">
-        <option value="Matematica">Matematica</option>
-        <option value="Fisica">Fisica</option>
-        <option value="Espanol">Espanol</option>
-        <option value="Ingles">Ingles</option>
-        <option value="Sociales">Sociales</option>
-      </select>
+  <section id="delete-user-section">
+    <h3>Eliminar Usuario</h3>
+    <input type="password" id="delete-password" placeholder="Contraseña" />
+    <button onclick="deleteUser()">Eliminar</button>
+    <p id="delete-error" style="color:red;"></p>
+    <button onclick="showSection('home-section')">Volver</button>
+  </section>
 
-      <label for="trimestre">Trimestre:</label>
-      <select id="trimestre">
-        <option value="1">1er Trimestre</option>
-        <option value="2">2do Trimestre</option>
-        <option value="3">3er Trimestre</option>
-      </select>
-
-      <label for="nota">Nota:</label>
-      <input type="number" id="nota" placeholder="Nota (0-10)" min="0" max="10">
-      <button onclick="addNote()">Agregar Nota</button>
-      <button class="back-btn" onclick="showHome()">Volver al Inicio</button>
-
-      <!-- Lista de notas -->
-      <div class="note-list" id="note-list"></div>
-
-      <!-- Gráfico -->
-      <canvas id="chart"></canvas>
-    </div>
-
-    <!-- Lista de usuarios creados -->
-    <div id="users-list-section" style="display:none;">
-      <h2>Usuarios Registrados</h2>
-      <ul id="users-list" class="users-list"></ul>
-      <button class="delete-btn" onclick="showDeleteUserForm()">Eliminar Usuario</button>
-    </div>
-
-    <!-- Formulario para eliminar usuario -->
-    <div id="delete-user-section" style="display:none;">
-      <label for="delete-password">Contraseña de Admin:</label>
-      <input type="password" id="delete-password" placeholder="Ingresa la contraseña">
-      <button onclick="deleteUser()">Eliminar Usuario</button>
-      <button class="back-btn" onclick="showUsersList()">Volver</button>
-      <div id="delete-error-message" class="error"></div>
-    </div>
-  </div>
-
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script>
+    let users = JSON.parse(localStorage.getItem("users") || "[]");
+    let notes = JSON.parse(localStorage.getItem("notes") || "{}");
     let currentUser = null;
-    const usersList = JSON.parse(localStorage.getItem('users')) || [];
-    const notes = JSON.parse(localStorage.getItem('notes')) || {};
 
-    // Mostrar el formulario de Login
-    function showLoginForm() {
-      document.getElementById('register-section').style.display = 'none';
-      document.getElementById('login-section').style.display = 'block';
-      document.getElementById('error-message').textContent = '';
-      document.getElementById('register-error-message').textContent = '';
+    function showSection(id) {
+      document.querySelectorAll('section').forEach(sec => sec.classList.remove('active'));
+      document.getElementById(id).classList.add('active');
     }
 
-    // Mostrar el formulario de Registro
-    function showRegisterForm() {
-      document.getElementById('login-section').style.display = 'none';
-      document.getElementById('register-section').style.display = 'block';
-      document.getElementById('error-message').textContent = '';
-    }
-
-    // Registrar un nuevo usuario
     function register() {
-      const username = document.getElementById('new-username').value;
-      if (!username) {
-        document.getElementById('register-error-message').textContent = 'Por favor ingrese un nombre de usuario.';
+      const user = document.getElementById("new-username").value.trim();
+      const error = document.getElementById("register-error");
+      if (!user) {
+        error.textContent = "El nombre no puede estar vacío.";
         return;
       }
-      if (usersList.includes(username)) {
-        document.getElementById('register-error-message').textContent = 'Este nombre de usuario ya está registrado.';
+      if (users.includes(user)) {
+        error.textContent = "El usuario ya existe.";
         return;
       }
-      usersList.push(username);
-      localStorage.setItem('users', JSON.stringify(usersList));
-      alert('Cuenta registrada con éxito');
-      showLoginForm();
+      users.push(user);
+      localStorage.setItem("users", JSON.stringify(users));
+      currentUser = user;
+      document.getElementById("current-user").textContent = user;
+      showSection("home-section");
     }
 
-    // Iniciar sesión
     function login() {
-      const username = document.getElementById('username').value;
-      if (!usersList.includes(username)) {
-        document.getElementById('error-message').textContent = 'Este usuario no existe.';
+      const user = document.getElementById("username").value.trim();
+      const error = document.getElementById("login-error");
+      if (!users.includes(user)) {
+        error.textContent = "Este usuario no existe.";
         return;
       }
-      currentUser = username;
-      document.getElementById('welcome-name').textContent = username;
-      showHome();
+      currentUser = user;
+      document.getElementById("current-user").textContent = user;
+      showSection("home-section");
     }
 
-    // Mostrar la página de inicio
-    function showHome() {
-      document.getElementById('home-section').style.display = 'block';
-      document.getElementById('login-section').style.display = 'none';
-      document.getElementById('register-section').style.display = 'none';
-    }
-
-    // Cerrar sesión
     function logout() {
       currentUser = null;
-      showLoginForm();
+      showSection("login-section");
     }
 
-    // Mostrar el formulario de agregar notas
-    function showNotesForm() {
-      document.getElementById('notes-section').style.display = 'block';
-      document.getElementById('home-section').style.display = 'none';
-    }
-
-    // Volver a la pantalla de inicio
-    function showHome() {
-      document.getElementById('home-section').style.display = 'block';
-      document.getElementById('notes-section').style.display = 'none';
-    }
-
-    // Agregar una nueva nota
     function addNote() {
-      const materia = document.getElementById('materia').value;
-      const trimestre = document.getElementById('trimestre').value;
-      const nota = parseFloat(document.getElementById('nota').value);
-      if (!nota || nota < 0 || nota > 10) {
-        alert('Por favor ingresa una nota válida entre 0 y 10.');
+      const materia = document.getElementById("materia").value;
+      const trimestre = document.getElementById("trimestre").value;
+      const nota = parseInt(document.getElementById("nota").value);
+      if (isNaN(nota) || nota < 0 || nota > 100) {
+        alert("Ingresa una nota válida entre 0 y 100.");
         return;
       }
-
-      if (!notes[currentUser]) {
-        notes[currentUser] = [];
-      }
+      if (!notes[currentUser]) notes[currentUser] = [];
       notes[currentUser].push({ materia, trimestre, nota });
-      localStorage.setItem('notes', JSON.stringify(notes));
-      showUserNotes();
+      localStorage.setItem("notes", JSON.stringify(notes));
+      document.getElementById("nota").value = '';
+      renderNotes();
     }
 
-    // Mostrar las notas del usuario
-    function showUserNotes() {
-      const noteList = document.getElementById('note-list');
-      noteList.innerHTML = '';
-      if (notes[currentUser]) {
-        notes[currentUser].forEach(note => {
-          const noteItem = document.createElement('div');
-          noteItem.className = 'note-item';
-          noteItem.innerHTML = `
-            <span><strong>Materia:</strong> ${note.materia}</span>
-            <span><strong>Trimestre:</strong> ${note.trimestre}</span>
-            <span><strong>Nota:</strong> ${note.nota}</span>
-          `;
-          noteList.appendChild(noteItem);
-        });
-      }
-    }
-
-    // Mostrar la lista de usuarios registrados
-    function showUsersList() {
-      const usersListContainer = document.getElementById('users-list');
-      usersListContainer.innerHTML = '';
-      usersList.forEach(user => {
-        const userItem = document.createElement('li');
-        userItem.textContent = user;
-        if (notes[user]) {
-          userItem.innerHTML += `<br><strong>Notas:</strong> ${notes[user].map(n => `${n.materia} (${n.trimestre}): ${n.nota}`).join(', ')}`;
-        }
-        usersListContainer.appendChild(userItem);
+    function renderNotes() {
+      const noteList = document.getElementById("note-list");
+      noteList.innerHTML = "";
+      const myNotes = notes[currentUser] || [];
+      myNotes.forEach(n => {
+        const div = document.createElement("div");
+        div.className = "note-item " + (n.nota >= 70 ? "green" : "red");
+        div.innerHTML = `
+          <strong>Materia:</strong> ${n.materia}<br>
+          <strong>Trimestre:</strong> ${n.trimestre}<br>
+          <strong>Nota:</strong> ${n.nota}
+        `;
+        noteList.appendChild(div);
       });
-      document.getElementById('users-list-section').style.display = 'block';
     }
 
-    // Mostrar formulario de eliminación de usuario
-    function showDeleteUserForm() {
-      document.getElementById('delete-user-section').style.display = 'block';
-      document.getElementById('users-list-section').style.display = 'none';
+    function showUsers() {
+      const ul = document.getElementById("users-list");
+      ul.innerHTML = "";
+      users.forEach(u => {
+        const li = document.createElement("li");
+        li.innerHTML = `<strong>${u}</strong><br>`;
+        const uNotes = notes[u] || [];
+        uNotes.forEach(n => {
+          li.innerHTML += `${n.materia} (${n.trimestre}): ${n.nota}<br>`;
+        });
+        ul.appendChild(li);
+      });
+      showSection("users-section");
     }
 
-    // Eliminar un usuario
     function deleteUser() {
-      const password = document.getElementById('delete-password').value;
-      if (password !== '04190909') {
-        document.getElementById('delete-error-message').textContent = 'La contraseña es incorrecta.';
+      const password = document.getElementById("delete-password").value;
+      const error = document.getElementById("delete-error");
+      if (password !== "04190909") {
+        error.textContent = "La contraseña es incorrecta.";
         return;
       }
-      const usernameToDelete = prompt('¿Qué usuario deseas eliminar?');
-      if (usersList.includes(usernameToDelete)) {
-        const index = usersList.indexOf(usernameToDelete);
-        usersList.splice(index, 1);
-        localStorage.setItem('users', JSON.stringify(usersList));
-        delete notes[usernameToDelete];
-        localStorage.setItem('notes', JSON.stringify(notes));
-        alert('Usuario eliminado correctamente.');
-        showUsersList();
-      } else {
-        alert('El usuario no existe.');
+      const confirmDelete = confirm("¿Seguro que deseas eliminar tu usuario?");
+      if (confirmDelete && currentUser) {
+        users = users.filter(u => u !== currentUser);
+        delete notes[currentUser];
+        localStorage.setItem("users", JSON.stringify(users));
+        localStorage.setItem("notes", JSON.stringify(notes));
+        currentUser = null;
+        showSection("login-section");
       }
-      document.getElementById('delete-user-section').style.display = 'none';
-      showUsersList();
     }
   </script>
 </body>
 </html>
+
