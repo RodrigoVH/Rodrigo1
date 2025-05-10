@@ -204,7 +204,7 @@
 
     // Eliminar un usuario
     function deleteUser() {
-      const userToDelete = document.getElementById('del-username').value.trim();
+      const userToDelete = document.getElementById('del-username').value;
       const adminPass = document.getElementById('admin-pass').value;
       const users = getUsers();
       if (adminPass !== ADMIN_PASSWORD) return alert('Contraseña de administrador incorrecta');
@@ -217,4 +217,5 @@
   </script>
 </body>
 </html>
+
 
