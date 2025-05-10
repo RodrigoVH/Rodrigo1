@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-  <title>Notas de Exámenes1</title>
+  <title>Notas de Exámenes</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body { font-family: Arial, sans-serif; background: #f0f2f5; padding: 10px; }
@@ -93,14 +93,17 @@
     let currentUser = null;
     const ADMIN_PASSWORD = '04190909';
 
+    // Función para guardar los usuarios en localStorage
     function saveUsers(users) {
       localStorage.setItem('users', JSON.stringify(users));
     }
 
+    // Función para obtener los usuarios de localStorage
     function getUsers() {
       return JSON.parse(localStorage.getItem('users') || '{}');
     }
 
+    // Registro de un nuevo usuario
     function register() {
       const user = document.getElementById('reg-username').value.trim();
       const pass = document.getElementById('reg-password').value;
@@ -112,6 +115,7 @@
       toggleLogin();
     }
 
+    // Iniciar sesión con un usuario
     function login() {
       const user = document.getElementById('login-username').value.trim();
       const pass = document.getElementById('login-password').value;
@@ -123,17 +127,13 @@
       toggleSections('main-section');
     }
 
+    // Cerrar sesión
     function logout() {
       currentUser = null;
       toggleSections('auth-section');
     }
 
-    function toggleSections(showId) {
-      ['auth-section', 'main-section', 'note-section', 'users-section', 'change-pass-section', 'delete-section']
-        .forEach(id => document.getElementById(id).classList.add('hidden'));
-      document.getElementById(showId).classList.remove('hidden');
-    }
-
+    // Función para alternar entre la pantalla de inicio de sesión y registro
     function toggleLogin() {
       document.getElementById('register-section').classList.add('hidden');
       document.getElementById('auth-section').classList.remove('hidden');
@@ -142,6 +142,13 @@
     function toggleRegister() {
       document.getElementById('register-section').classList.remove('hidden');
       document.getElementById('auth-section').classList.add('hidden');
+    }
+
+    // Mostrar las opciones principales después de iniciar sesión
+    function toggleSections(showId) {
+      ['auth-section', 'main-section', 'note-section', 'users-section', 'change-pass-section', 'delete-section']
+        .forEach(id => document.getElementById(id).classList.add('hidden'));
+      document.getElementById(showId).classList.remove('hidden');
     }
 
     function showAddNote() { toggleSections('note-section'); }
@@ -161,6 +168,7 @@
     function showChangePassword() { toggleSections('change-pass-section'); }
     function showDeleteUser() { toggleSections('delete-section'); }
 
+    // Agregar una nueva nota
     function addNote() {
       const subject = document.getElementById('subject').value;
       const term = document.getElementById('term').value;
@@ -175,6 +183,7 @@
 
     function backToMain() { toggleSections('main-section'); }
 
+    // Cambiar la contraseña del usuario
     function changePassword() {
       const oldPass = document.getElementById('old-pass').value;
       const newPass = document.getElementById('new-pass').value;
@@ -186,6 +195,7 @@
       backToMain();
     }
 
+    // Eliminar un usuario
     function deleteUser() {
       const userToDelete = document.getElementById('del-username').value.trim();
       const adminPass = document.getElementById('admin-pass').value;
@@ -200,4 +210,3 @@
   </script>
 </body>
 </html>
-
