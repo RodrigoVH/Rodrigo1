@@ -14,8 +14,8 @@
       display: flex;
       justify-content: center;
       align-items: center;
-      height: 100vh;
       flex-direction: column;
+      height: 100vh;
     }
     .container {
       width: 100%;
@@ -24,6 +24,7 @@
       background-color: #fff;
       border-radius: 10px;
       box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      overflow-y: auto;
     }
     h1 {
       text-align: center;
@@ -76,6 +77,23 @@
     .edit-btn:hover, .delete-btn:hover {
       opacity: 0.8;
     }
+    .error {
+      color: red;
+      font-size: 14px;
+      text-align: center;
+    }
+    .users-list {
+      margin-top: 20px;
+      font-size: 16px;
+      list-style-type: none;
+      padding: 0;
+    }
+    .users-list li {
+      padding: 5px;
+      margin: 5px 0;
+      background-color: #f9f9f9;
+      border-radius: 5px;
+    }
     canvas {
       margin-top: 30px;
       width: 100%;
@@ -87,14 +105,25 @@
   <div class="container">
     <h1>Notas de Exámenes</h1>
 
-    <!-- Formulario de registro/inicio de sesión -->
+    <!-- Login / Registro -->
     <div id="login-section">
-      <label for="username">Ingresa tu nombre de usuario:</label>
-      <input type="text" id="username" placeholder="Ejemplo: Rodrigo">
+      <label for="username">Nombre de usuario:</label>
+      <input type="text" id="username" placeholder="Ejemplo: Andre">
       <button onclick="login()">Iniciar sesión</button>
+      <button onclick="showRegisterForm()">Crear cuenta</button>
+      <div id="error-message" class="error"></div>
     </div>
 
-    <!-- Formulario para agregar notas -->
+    <!-- Formulario de registro -->
+    <div id="register-section" style="display: none;">
+      <label for="new-username">Nuevo nombre de usuario:</label>
+      <input type="text" id="new-username" placeholder="Ejemplo: Andre">
+      <button onclick="register()">Registrar cuenta</button>
+      <button onclick="showLoginForm()">Volver a Login</button>
+      <div id="register-error-message" class="error"></div>
+    </div>
+
+    <!-- Pantalla de notas -->
     <div id="notes-section" style="display:none;">
       <h2>Bienvenido, <span id="welcome-name"></span></h2>
       <label for="materia">Materia:</label>
@@ -105,32 +134,70 @@
       <input type="number" id="nota" placeholder="Nota (0-10)" min="0" max="10">
       <button onclick="addNote()">Agregar Nota</button>
       <button onclick="logout()">Cerrar sesión</button>
-      
+
       <!-- Lista de notas -->
       <div class="note-list" id="note-list"></div>
 
       <!-- Gráfico -->
       <canvas id="chart"></canvas>
     </div>
+
+    <!-- Lista de usuarios creados -->
+    <div id="users-list-section" style="display:none;">
+      <h2>Usuarios Registrados</h2>
+      <ul id="users-list" class="users-list"></ul>
+    </div>
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script>
     let currentUser = null;
+    const usersList = JSON.parse(localStorage.getItem('users')) || [];
+
+    // Mostrar el formulario de Login
+    function showLoginForm() {
+      document.getElementById('register-section').style.display = 'none';
+      document.getElementById('login-section').style.display = 'block';
+      document.getElementById('error-message').textContent = '';
+      document.getElementById('register-error-message').textContent = '';
+    }
+
+    // Mostrar el formulario de Registro
+    function showRegisterForm() {
+      document.getElementById('login-section').style.display = 'none';
+      document.getElementById('register-section').style.display = 'block';
+      document.getElementById('error-message').textContent = '';
+      document.getElementById('register-error-message').textContent = '';
+    }
+
+    // Registro de un nuevo usuario
+    function register() {
+      const newUsername = document.getElementById('new-username').value;
+      if (usersList.includes(newUsername)) {
+        document.getElementById('register-error-message').textContent = "Este usuario ya existe.";
+        return;
+      }
+
+      usersList.push(newUsername);
+      localStorage.setItem('users', JSON.stringify(usersList));
+      showLoginForm();
+    }
 
     // Iniciar sesión
     function login() {
       const username = document.getElementById('username').value;
-      if (username.trim() === "") {
-        alert("Por favor, ingresa un nombre de usuario.");
+      if (!usersList.includes(username)) {
+        document.getElementById('error-message').textContent = "Este usuario no existe.";
         return;
       }
+
       currentUser = username;
       document.getElementById('username').value = '';
       document.getElementById('login-section').style.display = 'none';
       document.getElementById('notes-section').style.display = 'block';
       document.getElementById('welcome-name').textContent = username;
       loadNotes();
+      showUsersList();
     }
 
     // Cerrar sesión
@@ -142,6 +209,20 @@
       document.getElementById('materia').value = '';
       document.getElementById('trimestre').value = '';
       document.getElementById('nota').value = '';
+      showUsersList();
+    }
+
+    // Mostrar la lista de usuarios
+    function showUsersList() {
+      const usersListSection = document.getElementById('users-list-section');
+      const usersListElement = document.getElementById('users-list');
+      usersListElement.innerHTML = '';
+      usersList.forEach(user => {
+        const li = document.createElement('li');
+        li.textContent = user;
+        usersListElement.appendChild(li);
+      });
+      usersListSection.style.display = 'block';
     }
 
     // Agregar nota
@@ -247,4 +328,5 @@
   </script>
 </body>
 </html>
+
 
