@@ -1,6 +1,4 @@
-
-
- <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8">
@@ -19,20 +17,25 @@
     .note.red { background: #f8d7da; }
     .note.green { background: #d4edda; }
     .btn-small { padding: 5px 10px; font-size: 12px; margin-left: 5px; }
+    .auth-section { text-align: center; }
   </style>
 </head>
 <body>
   <div class="container">
     <div id="auth-section">
-      <h2>Registro</h2>
-      <input id="reg-username" placeholder="Nombre de usuario">
-      <input id="reg-password" placeholder="Contraseña" type="password">
-      <button onclick="register()">Registrarse</button>
-
-      <h2>Login</h2>
+      <h2>Iniciar Sesión</h2>
       <input id="login-username" placeholder="Nombre de usuario">
       <input id="login-password" placeholder="Contraseña" type="password">
       <button onclick="login()">Iniciar Sesión</button>
+      <p>No tienes cuenta? <a href="javascript:void(0);" onclick="toggleRegister()">Registrarse</a></p>
+
+      <div id="register-section" class="hidden">
+        <h2>Registrarse</h2>
+        <input id="reg-username" placeholder="Nombre de usuario">
+        <input id="reg-password" placeholder="Contraseña" type="password">
+        <button onclick="register()">Registrarse</button>
+        <p>¿Ya tienes cuenta? <a href="javascript:void(0);" onclick="toggleLogin()">Iniciar Sesión</a></p>
+      </div>
     </div>
 
     <div id="main-section" class="hidden">
@@ -106,6 +109,7 @@
       users[user] = { password: pass, notes: [] };
       saveUsers(users);
       alert('Usuario registrado');
+      toggleLogin();
     }
 
     function login() {
@@ -124,6 +128,22 @@
       toggleSections('auth-section');
     }
 
+    function toggleSections(showId) {
+      ['auth-section', 'main-section', 'note-section', 'users-section', 'change-pass-section', 'delete-section']
+        .forEach(id => document.getElementById(id).classList.add('hidden'));
+      document.getElementById(showId).classList.remove('hidden');
+    }
+
+    function toggleLogin() {
+      document.getElementById('register-section').classList.add('hidden');
+      document.getElementById('auth-section').classList.remove('hidden');
+    }
+
+    function toggleRegister() {
+      document.getElementById('register-section').classList.remove('hidden');
+      document.getElementById('auth-section').classList.add('hidden');
+    }
+
     function showAddNote() { toggleSections('note-section'); }
     function showAllUsers() {
       toggleSections('users-section');
@@ -137,6 +157,7 @@
         list.appendChild(box);
       }
     }
+
     function showChangePassword() { toggleSections('change-pass-section'); }
     function showDeleteUser() { toggleSections('delete-section'); }
 
@@ -152,6 +173,8 @@
       backToMain();
     }
 
+    function backToMain() { toggleSections('main-section'); }
+
     function changePassword() {
       const oldPass = document.getElementById('old-pass').value;
       const newPass = document.getElementById('new-pass').value;
@@ -159,7 +182,7 @@
       if (users[currentUser].password !== oldPass) return alert('Contraseña actual incorrecta');
       users[currentUser].password = newPass;
       saveUsers(users);
-      alert('Contraseña actualizada con éxito');
+      alert('Contraseña cambiada');
       backToMain();
     }
 
@@ -167,23 +190,14 @@
       const userToDelete = document.getElementById('del-username').value.trim();
       const adminPass = document.getElementById('admin-pass').value;
       const users = getUsers();
-      if (adminPass !== ADMIN_PASSWORD) return alert('La contraseña es incorrecta');
-      if (!users[userToDelete]) return alert('Usuario no encontrado');
+      if (adminPass !== ADMIN_PASSWORD) return alert('Contraseña de administrador incorrecta');
+      if (!users[userToDelete]) return alert('El usuario no existe');
       delete users[userToDelete];
       saveUsers(users);
       alert('Usuario eliminado');
-      if (userToDelete === currentUser) logout();
-    }
-
-    function toggleSections(showId) {
-      ['auth-section', 'main-section', 'note-section', 'users-section', 'change-pass-section', 'delete-section']
-        .forEach(id => document.getElementById(id).classList.add('hidden'));
-      document.getElementById(showId).classList.remove('hidden');
-    }
-
-    function backToMain() {
-      toggleSections('main-section');
+      backToMain();
     }
   </script>
 </body>
 </html>
+
