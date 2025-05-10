@@ -22,22 +22,25 @@
 </head>
 <body>
   <div class="container">
+    <!-- Sección de autenticación (Login/Registro) -->
     <div id="auth-section">
       <h2>Iniciar Sesión</h2>
       <input id="login-username" placeholder="Nombre de usuario">
       <input id="login-password" placeholder="Contraseña" type="password">
       <button onclick="login()">Iniciar Sesión</button>
       <p>No tienes cuenta? <a href="javascript:void(0);" onclick="toggleRegister()">Registrarse</a></p>
-
-      <div id="register-section" class="hidden">
-        <h2>Registrarse</h2>
-        <input id="reg-username" placeholder="Nombre de usuario">
-        <input id="reg-password" placeholder="Contraseña" type="password">
-        <button onclick="register()">Registrarse</button>
-        <p>¿Ya tienes cuenta? <a href="javascript:void(0);" onclick="toggleLogin()">Iniciar Sesión</a></p>
-      </div>
     </div>
 
+    <!-- Sección de registro -->
+    <div id="register-section" class="hidden">
+      <h2>Registrarse</h2>
+      <input id="reg-username" placeholder="Nombre de usuario">
+      <input id="reg-password" placeholder="Contraseña" type="password">
+      <button onclick="register()">Registrarse</button>
+      <p>¿Ya tienes cuenta? <a href="javascript:void(0);" onclick="toggleLogin()">Iniciar Sesión</a></p>
+    </div>
+
+    <!-- Sección principal después de iniciar sesión -->
     <div id="main-section" class="hidden">
       <h2 id="welcome"></h2>
       <button onclick="showAddNote()">Agregar Nota</button>
@@ -47,6 +50,7 @@
       <button onclick="logout()">Cerrar Sesión</button>
     </div>
 
+    <!-- Sección para agregar una nueva nota -->
     <div id="note-section" class="hidden">
       <h2>Agregar Nota</h2>
       <select id="subject">
@@ -66,12 +70,14 @@
       <button onclick="backToMain()">Volver</button>
     </div>
 
+    <!-- Sección para ver todos los usuarios -->
     <div id="users-section" class="hidden">
       <h2>Usuarios Registrados</h2>
       <div id="user-list"></div>
       <button onclick="backToMain()">Volver</button>
     </div>
 
+    <!-- Sección para cambiar la contraseña -->
     <div id="change-pass-section" class="hidden">
       <h2>Cambiar Contraseña</h2>
       <input id="old-pass" placeholder="Contraseña actual" type="password">
@@ -80,6 +86,7 @@
       <button onclick="backToMain()">Volver</button>
     </div>
 
+    <!-- Sección para eliminar un usuario -->
     <div id="delete-section" class="hidden">
       <h2>Eliminar Usuario</h2>
       <input id="del-username" placeholder="Usuario a eliminar">
@@ -201,7 +208,7 @@
       const adminPass = document.getElementById('admin-pass').value;
       const users = getUsers();
       if (adminPass !== ADMIN_PASSWORD) return alert('Contraseña de administrador incorrecta');
-      if (!users[userToDelete]) return alert('El usuario no existe');
+      if (!users[userToDelete]) return alert('Este usuario no existe');
       delete users[userToDelete];
       saveUsers(users);
       alert('Usuario eliminado');
@@ -210,3 +217,4 @@
   </script>
 </body>
 </html>
+
