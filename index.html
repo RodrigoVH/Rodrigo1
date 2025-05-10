@@ -205,7 +205,16 @@
     <div id="users-list-section" style="display:none;">
       <h2>Usuarios Registrados</h2>
       <ul id="users-list" class="users-list"></ul>
-      <button class="delete-btn" onclick="deleteUser()">Eliminar Usuario</button>
+      <button class="delete-btn" onclick="showDeleteUserForm()">Eliminar Usuario</button>
+    </div>
+
+    <!-- Formulario para eliminar usuario -->
+    <div id="delete-user-section" style="display:none;">
+      <label for="delete-password">Contraseña de Admin:</label>
+      <input type="password" id="delete-password" placeholder="Ingresa la contraseña">
+      <button onclick="deleteUser()">Eliminar Usuario</button>
+      <button class="back-btn" onclick="showUsersList()">Volver</button>
+      <div id="delete-error-message" class="error"></div>
     </div>
   </div>
 
@@ -213,6 +222,7 @@
   <script>
     let currentUser = null;
     const usersList = JSON.parse(localStorage.getItem('users')) || [];
+    const notes = JSON.parse(localStorage.getItem('notes')) || {};
 
     // Mostrar el formulario de Login
     function showLoginForm() {
@@ -227,18 +237,22 @@
       document.getElementById('login-section').style.display = 'none';
       document.getElementById('register-section').style.display = 'block';
       document.getElementById('error-message').textContent = '';
-      document.getElementById('register-error-message').textContent = '';
     }
 
-    // Registro de un nuevo usuario
+    // Registrar un nuevo usuario
     function register() {
-      const newUsername = document.getElementById('new-username').value;
-      if (usersList.includes(newUsername)) {
-        document.getElementById('register-error-message').textContent = "Este usuario ya existe.";
+      const username = document.getElementById('new-username').value;
+      if (!username) {
+        document.getElementById('register-error-message').textContent = 'Por favor ingrese un nombre de usuario.';
         return;
       }
-      usersList.push(newUsername);
+      if (usersList.includes(username)) {
+        document.getElementById('register-error-message').textContent = 'Este nombre de usuario ya está registrado.';
+        return;
+      }
+      usersList.push(username);
       localStorage.setItem('users', JSON.stringify(usersList));
+      alert('Cuenta registrada con éxito');
       showLoginForm();
     }
 
@@ -246,102 +260,73 @@
     function login() {
       const username = document.getElementById('username').value;
       if (!usersList.includes(username)) {
-        document.getElementById('error-message').textContent = "Este usuario no existe.";
+        document.getElementById('error-message').textContent = 'Este usuario no existe.';
         return;
       }
       currentUser = username;
-      document.getElementById('username').value = '';
-      document.getElementById('login-section').style.display = 'none';
+      document.getElementById('welcome-name').textContent = username;
       showHome();
+    }
+
+    // Mostrar la página de inicio
+    function showHome() {
+      document.getElementById('home-section').style.display = 'block';
+      document.getElementById('login-section').style.display = 'none';
+      document.getElementById('register-section').style.display = 'none';
     }
 
     // Cerrar sesión
     function logout() {
       currentUser = null;
-      document.getElementById('login-section').style.display = 'block';
-      document.getElementById('home-section').style.display = 'none';
-      document.getElementById('note-list').innerHTML = '';
-      document.getElementById('materia').value = '';
-      document.getElementById('trimestre').value = '';
-      document.getElementById('nota').value = '';
-      showUsersList();
+      showLoginForm();
     }
 
-    // Mostrar la pantalla de inicio
+    // Mostrar el formulario de agregar notas
+    function showNotesForm() {
+      document.getElementById('notes-section').style.display = 'block';
+      document.getElementById('home-section').style.display = 'none';
+    }
+
+    // Volver a la pantalla de inicio
     function showHome() {
       document.getElementById('home-section').style.display = 'block';
       document.getElementById('notes-section').style.display = 'none';
-      document.getElementById('welcome-name').textContent = currentUser;
     }
 
-    // Mostrar el formulario de notas
-    function showNotesForm() {
-      document.getElementById('home-section').style.display = 'none';
-      document.getElementById('notes-section').style.display = 'block';
+    // Agregar una nueva nota
+    function addNote() {
+      const materia = document.getElementById('materia').value;
+      const trimestre = document.getElementById('trimestre').value;
+      const nota = parseFloat(document.getElementById('nota').value);
+      if (!nota || nota < 0 || nota > 10) {
+        alert('Por favor ingresa una nota válida entre 0 y 10.');
+        return;
+      }
+      
+      if (!notes[currentUser]) {
+        notes[currentUser] = [];
+      }
+      notes[currentUser].push({ materia, trimestre, nota });
+      localStorage.setItem('notes', JSON.stringify(notes));
+      showUserNotes();
     }
 
     // Mostrar las notas del usuario
     function showUserNotes() {
-      const userNotes = getUserNotes();
       const noteList = document.getElementById('note-list');
       noteList.innerHTML = '';
-
-      userNotes.forEach((note, index) => {
-        const noteItem = document.createElement('div');
-        noteItem.classList.add('note-item');
-        noteItem.innerHTML = `
-          <span><strong>Materia:</strong> ${note.materia}</span>
-          <span><strong>Trimestre:</strong> ${note.trimestre}</span>
-          <span><strong>Nota:</strong> ${note.nota}</span>
-          <button class="edit-btn" onclick="editNote(${index})">Editar</button>
-          <button class="delete-btn" onclick="deleteNote(${index})">Eliminar</button>
-        `;
-        noteList.appendChild(noteItem);
-      });
-    }
-
-    // Agregar una nota
-    function addNote() {
-      const materia = document.getElementById('materia').value;
-      const trimestre = document.getElementById('trimestre').value;
-      const nota = document.getElementById('nota').value;
-      
-      if (!nota || nota < 0 || nota > 10) {
-        alert('Por favor, ingresa una nota válida entre 0 y 10.');
-        return;
+      if (notes[currentUser]) {
+        notes[currentUser].forEach(note => {
+          const noteItem = document.createElement('div');
+          noteItem.className = 'note-item';
+          noteItem.innerHTML = `
+            <span><strong>Materia:</strong> ${note.materia}</span>
+            <span><strong>Trimestre:</strong> ${note.trimestre}</span>
+            <span><strong>Nota:</strong> ${note.nota}</span>
+          `;
+          noteList.appendChild(noteItem);
+        });
       }
-      
-      const userNotes = getUserNotes();
-      userNotes.push({materia, trimestre, nota: parseFloat(nota)});
-      localStorage.setItem(currentUser, JSON.stringify(userNotes));
-      showUserNotes();
-      document.getElementById('materia').value = '';
-      document.getElementById('trimestre').value = '';
-      document.getElementById('nota').value = '';
-    }
-
-    // Obtener las notas del usuario
-    function getUserNotes() {
-      const notes = JSON.parse(localStorage.getItem(currentUser)) || [];
-      return notes;
-    }
-
-    // Eliminar una nota
-    function deleteNote(index) {
-      const userNotes = getUserNotes();
-      userNotes.splice(index, 1);
-      localStorage.setItem(currentUser, JSON.stringify(userNotes));
-      showUserNotes();
-    }
-
-    // Editar una nota
-    function editNote(index) {
-      const userNotes = getUserNotes();
-      const note = userNotes[index];
-      document.getElementById('materia').value = note.materia;
-      document.getElementById('trimestre').value = note.trimestre;
-      document.getElementById('nota').value = note.nota;
-      deleteNote(index);
     }
 
     // Mostrar la lista de usuarios registrados
@@ -351,27 +336,46 @@
       usersList.forEach(user => {
         const userItem = document.createElement('li');
         userItem.textContent = user;
+        if (notes[user]) {
+          userItem.innerHTML += `<br><strong>Notas:</strong> ${notes[user].map(n => `${n.materia} (${n.trimestre}): ${n.nota}`).join(', ')}`;
+        }
         usersListContainer.appendChild(userItem);
       });
       document.getElementById('users-list-section').style.display = 'block';
     }
 
-    // Eliminar un usuario (admin)
+    // Mostrar formulario de eliminación de usuario
+    function showDeleteUserForm() {
+      document.getElementById('delete-user-section').style.display = 'block';
+      document.getElementById('users-list-section').style.display = 'none';
+    }
+
+    // Eliminar un usuario
     function deleteUser() {
-      const usernameToDelete = prompt("¿Qué usuario quieres eliminar?");
+      const password = document.getElementById('delete-password').value;
+      if (password !== '04190909') {
+        document.getElementById('delete-error-message').textContent = 'La contraseña es incorrecta.';
+        return;
+      }
+      const usernameToDelete = prompt('¿Qué usuario deseas eliminar?');
       if (usersList.includes(usernameToDelete)) {
         const index = usersList.indexOf(usernameToDelete);
         usersList.splice(index, 1);
         localStorage.setItem('users', JSON.stringify(usersList));
-        alert("Usuario eliminado correctamente.");
+        delete notes[usernameToDelete];
+        localStorage.setItem('notes', JSON.stringify(notes));
+        alert('Usuario eliminado correctamente.');
         showUsersList();
       } else {
-        alert("El usuario no existe.");
+        alert('El usuario no existe.');
       }
+      document.getElementById('delete-user-section').style.display = 'none';
+      showUsersList();
     }
   </script>
 </body>
 </html>
+
 
 
 
