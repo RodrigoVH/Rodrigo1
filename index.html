@@ -1,12 +1,250 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Rodrigo App n1</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Registro de Notas</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f1f1f1;
+      color: #333;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      flex-direction: column;
+    }
+    .container {
+      width: 100%;
+      max-width: 600px;
+      padding: 20px;
+      background-color: #fff;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+    h1 {
+      text-align: center;
+      color: #4CAF50;
+    }
+    label {
+      font-size: 18px;
+    }
+    input, select, button {
+      width: 100%;
+      padding: 10px;
+      margin: 10px 0;
+      border-radius: 5px;
+      border: 1px solid #ddd;
+      font-size: 16px;
+    }
+    button {
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+    }
+    button:hover {
+      background-color: #45a049;
+    }
+    .note-list {
+      margin-top: 20px;
+    }
+    .note-item {
+      background-color: #fafafa;
+      padding: 10px;
+      margin: 10px 0;
+      border-radius: 5px;
+      box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+    }
+    .note-item span {
+      display: inline-block;
+      margin-right: 10px;
+    }
+    .edit-btn, .delete-btn {
+      background-color: #f0ad4e;
+      border: none;
+      color: white;
+      padding: 5px;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    .delete-btn {
+      background-color: #d9534f;
+    }
+    .edit-btn:hover, .delete-btn:hover {
+      opacity: 0.8;
+    }
+    canvas {
+      margin-top: 30px;
+      width: 100%;
+      max-width: 500px;
+    }
+  </style>
 </head>
 <body>
-  <h1>Rodrigo App</h1>
-  <p>Esto es una prueba de página para usar con Shortcuts.</p>
+  <div class="container">
+    <h1>Notas de Exámenes</h1>
+
+    <!-- Formulario de registro/inicio de sesión -->
+    <div id="login-section">
+      <label for="username">Ingresa tu nombre de usuario:</label>
+      <input type="text" id="username" placeholder="Ejemplo: Rodrigo">
+      <button onclick="login()">Iniciar sesión</button>
+    </div>
+
+    <!-- Formulario para agregar notas -->
+    <div id="notes-section" style="display:none;">
+      <h2>Bienvenido, <span id="welcome-name"></span></h2>
+      <label for="materia">Materia:</label>
+      <input type="text" id="materia" placeholder="Ejemplo: Matemáticas">
+      <label for="trimestre">Trimestre:</label>
+      <input type="text" id="trimestre" placeholder="Ejemplo: 1er Trimestre">
+      <label for="nota">Nota:</label>
+      <input type="number" id="nota" placeholder="Nota (0-10)" min="0" max="10">
+      <button onclick="addNote()">Agregar Nota</button>
+      <button onclick="logout()">Cerrar sesión</button>
+      
+      <!-- Lista de notas -->
+      <div class="note-list" id="note-list"></div>
+
+      <!-- Gráfico -->
+      <canvas id="chart"></canvas>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script>
+    let currentUser = null;
+
+    // Iniciar sesión
+    function login() {
+      const username = document.getElementById('username').value;
+      if (username.trim() === "") {
+        alert("Por favor, ingresa un nombre de usuario.");
+        return;
+      }
+      currentUser = username;
+      document.getElementById('username').value = '';
+      document.getElementById('login-section').style.display = 'none';
+      document.getElementById('notes-section').style.display = 'block';
+      document.getElementById('welcome-name').textContent = username;
+      loadNotes();
+    }
+
+    // Cerrar sesión
+    function logout() {
+      currentUser = null;
+      document.getElementById('login-section').style.display = 'block';
+      document.getElementById('notes-section').style.display = 'none';
+      document.getElementById('note-list').innerHTML = '';
+      document.getElementById('materia').value = '';
+      document.getElementById('trimestre').value = '';
+      document.getElementById('nota').value = '';
+    }
+
+    // Agregar nota
+    function addNote() {
+      const materia = document.getElementById('materia').value;
+      const trimestre = document.getElementById('trimestre').value;
+      const nota = document.getElementById('nota').value;
+      
+      if (!materia || !trimestre || !nota) {
+        alert("Por favor, completa todos los campos.");
+        return;
+      }
+
+      const userNotes = getUserNotes();
+      userNotes.push({ materia, trimestre, nota: parseFloat(nota) });
+      saveUserNotes(userNotes);
+      loadNotes();
+      document.getElementById('materia').value = '';
+      document.getElementById('trimestre').value = '';
+      document.getElementById('nota').value = '';
+    }
+
+    // Eliminar nota
+    function deleteNote(index) {
+      const userNotes = getUserNotes();
+      userNotes.splice(index, 1);
+      saveUserNotes(userNotes);
+      loadNotes();
+    }
+
+    // Editar nota
+    function editNote(index) {
+      const userNotes = getUserNotes();
+      const note = userNotes[index];
+      document.getElementById('materia').value = note.materia;
+      document.getElementById('trimestre').value = note.trimestre;
+      document.getElementById('nota').value = note.nota;
+      deleteNote(index);
+    }
+
+    // Cargar notas del usuario
+    function loadNotes() {
+      const userNotes = getUserNotes();
+      const noteList = document.getElementById('note-list');
+      noteList.innerHTML = '';
+
+      userNotes.forEach((note, index) => {
+        const noteItem = document.createElement('div');
+        noteItem.classList.add('note-item');
+        noteItem.innerHTML = `
+          <span><strong>Materia:</strong> ${note.materia}</span>
+          <span><strong>Trimestre:</strong> ${note.trimestre}</span>
+          <span><strong>Nota:</strong> ${note.nota}</span>
+          <button class="edit-btn" onclick="editNote(${index})">Editar</button>
+          <button class="delete-btn" onclick="deleteNote(${index})">Eliminar</button>
+        `;
+        noteList.appendChild(noteItem);
+      });
+
+      renderChart(userNotes);
+    }
+
+    // Obtener notas del usuario desde localStorage
+    function getUserNotes() {
+      const notes = localStorage.getItem(currentUser);
+      return notes ? JSON.parse(notes) : [];
+    }
+
+    // Guardar notas del usuario en localStorage
+    function saveUserNotes(notes) {
+      localStorage.setItem(currentUser, JSON.stringify(notes));
+    }
+
+    // Renderizar gráfico de notas
+    function renderChart(userNotes) {
+      const labels = userNotes.map(note => `${note.materia} (${note.trimestre})`);
+      const data = userNotes.map(note => note.nota);
+
+      const ctx = document.getElementById('chart').getContext('2d');
+      new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: labels,
+          datasets: [{
+            label: 'Notas por materia',
+            data: data,
+            backgroundColor: 'rgba(76, 175, 80, 0.5)',
+            borderColor: 'rgba(76, 175, 80, 1)',
+            borderWidth: 1
+          }]
+        },
+        options: {
+          responsive: true,
+          scales: {
+            y: {
+              beginAtZero: true,
+              max: 10
+            }
+          }
+        }
+      });
+    }
+  </script>
 </body>
 </html>
+
