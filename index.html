@@ -74,6 +74,24 @@
       font-size: 12px;
       cursor: pointer;
     }
+
+    .league-table {
+      width: 100%;
+      margin-top: 20px;
+      border-collapse: collapse;
+    }
+
+    .league-table th, .league-table td {
+      border: 1px solid #ddd;
+      padding: 10px;
+      text-align: center;
+    }
+
+    .league-table th {
+      background-color: #007bff;
+      color: white;
+    }
+
   </style>
 </head>
 <body>
@@ -102,6 +120,7 @@
     <div class="menu">
       <button onclick="showSection('add-note-section')">Agregar Nota</button>
       <button onclick="showUsers()">Ver Usuarios Registrados</button>
+      <button onclick="showLeague()">Ver Liga</button>
       <button onclick="showSection('delete-user-section')">Eliminar Usuario</button>
       <button onclick="logout()">Cerrar sesión</button>
     </div>
@@ -138,6 +157,23 @@
     <input type="password" id="delete-password" placeholder="Contraseña" />
     <button onclick="deleteUser()">Eliminar</button>
     <p id="delete-error" style="color:red;"></p>
+    <button onclick="showSection('home-section')">Volver</button>
+  </section>
+
+  <section id="league-section">
+    <h3>Tabla de Clasificación</h3>
+    <table class="league-table">
+      <thead>
+        <tr>
+          <th>Posición</th>
+          <th>Usuario</th>
+          <th>Exámenes</th>
+          <th>Promedio</th>
+        </tr>
+      </thead>
+      <tbody id="league-body">
+      </tbody>
+    </table>
     <button onclick="showSection('home-section')">Volver</button>
   </section>
 
@@ -219,23 +255,19 @@
       });
     }
 
-    // Editar una nota
     function editNote(index) {
       const note = notes[currentUser][index];
-      const materia = prompt("Modificar materia:", note.materia);
-      const trimestre = prompt("Modificar trimestre:", note.trimestre);
-      const nota = prompt("Modificar nota:", note.nota);
-
-      if (materia && trimestre && !isNaN(nota) && nota >= 0 && nota <= 100) {
-        notes[currentUser][index] = { materia, trimestre, nota: parseInt(nota) };
+      const newNota = prompt("Editar Nota", note.nota);
+      if (newNota != null && !isNaN(newNota) && newNota >= 0 && newNota <= 100) {
+        notes[currentUser][index].nota = parseInt(newNota);
         localStorage.setItem("notes", JSON.stringify(notes));
         renderNotes();
       }
     }
 
-    // Eliminar una nota
     function deleteNote(index) {
-      if (confirm("¿Seguro que deseas eliminar esta nota?")) {
+      const confirmDelete = confirm("¿Seguro que deseas eliminar esta nota?");
+      if (confirmDelete) {
         notes[currentUser].splice(index, 1);
         localStorage.setItem("notes", JSON.stringify(notes));
         renderNotes();
@@ -257,26 +289,68 @@
       showSection("users-section");
     }
 
+    function showLeague() {
+      const leagueBody = document.getElementById("league-body");
+      leagueBody.innerHTML = "";
+
+      let league = users.map(user => {
+        const userNotes = notes[user] || [];
+        const average = userNotes.length > 0
+          ? userNotes.reduce((sum, note) => sum + note.nota, 0) / userNotes.length
+          : 0;
+        return {
+          user,
+          average,
+          exams: userNotes.length
+        };
+      });
+
+      league.sort((a, b) => b.average - a.average);
+
+      league.forEach((entry, index) => {
+        const row = document.createElement("tr");
+        row.innerHTML = `
+          <td>${index + 1}</td>
+          <td>${entry.user}</td>
+          <td>${entry.exams}</td>
+          <td>${entry.average.toFixed(2)}</td>
+        `;
+        leagueBody.appendChild(row);
+      });
+
+      showSection("league-section");
+    }
+
     function deleteUser() {
       const password = document.getElementById("delete-password").value;
       const error = document.getElementById("delete-error");
+
       if (password !== "04190909") {
         error.textContent = "La contraseña es incorrecta.";
         return;
       }
-      const confirmDelete = confirm("¿Seguro que deseas eliminar tu usuario?");
-      if (confirmDelete && currentUser) {
-        users = users.filter(u => u !== currentUser);
-        delete notes[currentUser];
+
+      const userToDelete = prompt("Ingresa el nombre del usuario que deseas eliminar:\n" + users.join("\n"));
+
+      if (!userToDelete || !users.includes(userToDelete)) {
+        error.textContent = "El usuario no existe.";
+        return;
+      }
+
+      const confirmDelete = confirm(`¿Seguro que deseas eliminar el usuario ${userToDelete}?`);
+      if (confirmDelete) {
+        users = users.filter(u => u !== userToDelete);
+        delete notes[userToDelete];
         localStorage.setItem("users", JSON.stringify(users));
         localStorage.setItem("notes", JSON.stringify(notes));
-        currentUser = null;
-        showSection("login-section");
+        alert(`El usuario ${userToDelete} ha sido eliminado.`);
+        showSection("home-section");
       }
     }
   </script>
 </body>
 </html>
+
 
 
 
