@@ -20,7 +20,7 @@
     }
     .container {
       width: 100%;
-      max-width: 600px;
+      max-width: 400px; /* Hacer la página más estrecha para pantallas de iPhone */
       padding: 20px;
       background-color: #fff;
       border-radius: 10px;
@@ -101,12 +101,40 @@
       max-width: 500px;
     }
     .nav-buttons {
-      display: flex;
-      justify-content: space-around;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
       margin-top: 20px;
     }
     .nav-buttons button {
-      width: 48%;
+      width: 100%;
+      padding: 15px;
+      font-size: 16px;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 10px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      cursor: pointer;
+      text-align: center;
+    }
+    .nav-buttons button:hover {
+      background-color: #45a049;
+    }
+    .nav-buttons button:active {
+      transform: scale(0.98);
+    }
+    .back-btn {
+      background-color: #f0ad4e;
+    }
+    .back-btn:hover {
+      background-color: #ec971f;
+    }
+    .delete-btn {
+      background-color: #d9534f;
+    }
+    .delete-btn:hover {
+      background-color: #c9302c;
     }
   </style>
 </head>
@@ -137,8 +165,8 @@
       <h2>Bienvenido, <span id="welcome-name"></span></h2>
       <div class="nav-buttons">
         <button onclick="showNotesForm()">Agregar Notas</button>
-        <button onclick="showUserNotes()">Mis Notas</button>
-        <button onclick="showUsersList()">Usuarios Registrados</button>
+        <button onclick="showUserNotes()">Ver Notas</button>
+        <button onclick="showUsersList()">Ver Usuarios</button>
         <button onclick="logout()">Cerrar sesión</button>
       </div>
     </div>
@@ -146,17 +174,25 @@
     <!-- Pantalla de notas -->
     <div id="notes-section" style="display:none;">
       <label for="materia">Materia:</label>
-      <input type="text" id="materia" placeholder="Ejemplo: Matemáticas">
+      <select id="materia">
+        <option value="Matematica">Matematica</option>
+        <option value="Fisica">Fisica</option>
+        <option value="Espanol">Espanol</option>
+        <option value="Ingles">Ingles</option>
+        <option value="Sociales">Sociales</option>
+      </select>
+
       <label for="trimestre">Trimestre:</label>
       <select id="trimestre">
         <option value="1">1er Trimestre</option>
         <option value="2">2do Trimestre</option>
         <option value="3">3er Trimestre</option>
       </select>
+
       <label for="nota">Nota:</label>
       <input type="number" id="nota" placeholder="Nota (0-10)" min="0" max="10">
       <button onclick="addNote()">Agregar Nota</button>
-      <button onclick="showHome()">Volver al Inicio</button>
+      <button class="back-btn" onclick="showHome()">Volver al Inicio</button>
 
       <!-- Lista de notas -->
       <div class="note-list" id="note-list"></div>
@@ -169,7 +205,7 @@
     <div id="users-list-section" style="display:none;">
       <h2>Usuarios Registrados</h2>
       <ul id="users-list" class="users-list"></ul>
-      <button onclick="deleteUser()">Eliminar Usuario</button>
+      <button class="delete-btn" onclick="deleteUser()">Eliminar Usuario</button>
     </div>
   </div>
 
@@ -262,96 +298,81 @@
         `;
         noteList.appendChild(noteItem);
       });
-
-      renderChart(userNotes);
     }
 
-    // Agregar nota
+    // Agregar una nota
     function addNote() {
       const materia = document.getElementById('materia').value;
       const trimestre = document.getElementById('trimestre').value;
       const nota = document.getElementById('nota').value;
-      if (!materia || !trimestre || !nota) {
-        alert("Por favor, completa todos los campos.");
+      
+      if (!nota || nota < 0 || nota > 10) {
+        alert('Por favor, ingresa una nota válida entre 0 y 10.');
         return;
       }
+      
       const userNotes = getUserNotes();
-      userNotes.push({ materia, trimestre, nota: parseFloat(nota) });
-      saveUserNotes(userNotes);
+      userNotes.push({materia, trimestre, nota: parseFloat(nota)});
+      localStorage.setItem(currentUser, JSON.stringify(userNotes));
       showUserNotes();
       document.getElementById('materia').value = '';
       document.getElementById('trimestre').value = '';
       document.getElementById('nota').value = '';
     }
 
-    // Eliminar nota
+    // Obtener las notas del usuario
+    function getUserNotes() {
+      const notes = JSON.parse(localStorage.getItem(currentUser)) || [];
+      return notes;
+    }
+
+    // Eliminar una nota
     function deleteNote(index) {
       const userNotes = getUserNotes();
       userNotes.splice(index, 1);
-      saveUserNotes(userNotes);
+      localStorage.setItem(currentUser, JSON.stringify(userNotes));
       showUserNotes();
     }
 
-    // Eliminar usuario
+    // Editar una nota
+    function editNote(index) {
+      const userNotes = getUserNotes();
+      const note = userNotes[index];
+      document.getElementById('materia').value = note.materia;
+      document.getElementById('trimestre').value = note.trimestre;
+      document.getElementById('nota').value = note.nota;
+      deleteNote(index);
+    }
+
+    // Mostrar la lista de usuarios registrados
+    function showUsersList() {
+      const usersListContainer = document.getElementById('users-list');
+      usersListContainer.innerHTML = '';
+      usersList.forEach(user => {
+        const userItem = document.createElement('li');
+        userItem.textContent = user;
+        usersListContainer.appendChild(userItem);
+      });
+      document.getElementById('users-list-section').style.display = 'block';
+    }
+
+    // Eliminar un usuario (admin)
     function deleteUser() {
-      const username = prompt("Introduce el nombre del usuario que deseas eliminar:");
-      const index = usersList.indexOf(username);
-      if (index !== -1) {
+      const usernameToDelete = prompt("¿Qué usuario quieres eliminar?");
+      if (usersList.includes(usernameToDelete)) {
+        const index = usersList.indexOf(usernameToDelete);
         usersList.splice(index, 1);
         localStorage.setItem('users', JSON.stringify(usersList));
         alert("Usuario eliminado correctamente.");
-        showLoginForm();
+        showUsersList();
       } else {
-        alert("Este usuario no existe.");
+        alert("El usuario no existe.");
       }
-    }
-
-    // Obtener notas del usuario
-    function getUserNotes() {
-      const notes = localStorage.getItem(currentUser);
-      return notes ? JSON.parse(notes) : [];
-    }
-
-    // Guardar notas del usuario
-    function saveUserNotes(notes) {
-      localStorage.setItem(currentUser, JSON.stringify(notes));
-    }
-
-    // Renderizar gráfico de notas
-    function renderChart(userNotes) {
-      const labels = userNotes.map(note => `${note.materia} (${note.trimestre})`);
-      const data = userNotes.map(note => note.nota);
-
-      const average = data.reduce((a, b) => a + b, 0) / data.length;
-      const color = average < 70 ? 'red' : 'green'; 
-
-      const ctx = document.getElementById('chart').getContext('2d');
-      new Chart(ctx, {
-        type: 'bar',
-        data: {
-          labels: labels,
-          datasets: [{
-            label: 'Notas por materia',
-            data: data,
-            backgroundColor: color,
-            borderColor: color,
-            borderWidth: 1
-          }]
-        },
-        options: {
-          responsive: true,
-          scales: {
-            y: {
-              beginAtZero: true,
-              max: 10
-            }
-          }
-        }
-      });
     }
   </script>
 </body>
 </html>
+
 
 
 
